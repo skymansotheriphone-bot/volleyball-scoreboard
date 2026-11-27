@@ -1,133 +1,287 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Volleyball Live Scoreboard</title>
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Volleyball Live</title><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0b1220;--panel:#121e30;--panel2:#1b2b42;--line:#2d405b;--text:#f5f8fc;--muted:#a9b8ca;--accent:#f3b72f;--home:#1769aa;--away:#a83245;--green:#28c982}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-button,input,select{font:inherit}button{border:0;border-radius:12px;padding:12px 14px;background:#263a55;color:white;font-weight:750;cursor:pointer}button:active{transform:scale(.98)}button.primary{background:var(--accent);color:#17202d}button.good{background:#167c59}button.danger{background:#873447}input,select{width:100%;border:1px solid var(--line);background:#0e1929;color:white;border-radius:10px;padding:11px;min-width:0}
-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line);gap:12px}header strong{font-size:17px;letter-spacing:.04em}header small{color:var(--muted)}
-main{max-width:1100px;margin:auto;padding:16px;display:grid;gap:14px}.toolbar{display:flex;gap:8px;flex-wrap:wrap}.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:15px}.card h2{font-size:14px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin:0 0 12px}.teams{display:grid;grid-template-columns:1fr 1fr;gap:12px}.team{border-radius:14px;padding:14px;background:var(--panel2);border-top:5px solid var(--home)}.team.away{border-top-color:var(--away)}.team-head{display:flex;align-items:center;gap:10px}.logo{width:42px;height:42px;border-radius:10px;display:grid;place-items:center;background:#0d1929;color:var(--accent);font-weight:900;overflow:hidden;flex:none}.logo img{width:100%;height:100%;object-fit:cover}.team-name{font-weight:900;font-size:clamp(16px,3vw,22px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.score{font-size:clamp(54px,10vw,82px);font-weight:950;line-height:1;text-align:center;margin:16px 0}.score-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.score-actions button{font-size:18px;padding:15px}.meta{display:flex;justify-content:space-between;color:var(--muted);font-size:13px;margin-top:10px}.settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.field{display:grid;gap:5px}.field label{font-size:12px;color:var(--muted);font-weight:700}.wide{grid-column:1/-1}.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.serve{display:flex;align-items:center;gap:8px}.serve button{flex:1}.serve .active{outline:2px solid var(--accent);background:#59451b}.sets{display:flex;gap:7px;flex-wrap:wrap}.set-chip{background:#20334c;border:1px solid var(--line);padding:8px 10px;border-radius:9px;font-weight:800}.set-chip.current{border-color:var(--accent);color:var(--accent)}.status{font-size:12px;color:var(--muted)}.note{color:var(--muted);font-size:12px;line-height:1.45}.overlay-wrap{min-height:100vh;display:flex;align-items:flex-end;justify-content:center;padding:4vh 3vw;background:transparent}.overlay{width:min(1100px,100%);display:grid;grid-template-columns:1fr auto 1fr;align-items:stretch;background:rgba(7,13,23,.94);border:1px solid rgba(255,255,255,.18);border-radius:12px;overflow:hidden;box-shadow:0 8px 35px #0008}.ov-team{display:flex;align-items:center;gap:12px;padding:12px 16px;min-width:0}.ov-team.home{border-left:7px solid var(--home)}.ov-team.away{border-right:7px solid var(--away);justify-content:flex-end;text-align:right}.ov-name{font-weight:900;font-size:clamp(15px,2vw,24px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ov-score{font-size:clamp(34px,5vw,58px);font-weight:950;line-height:1}.ov-center{background:#17263a;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 14px;min-width:125px}.ov-set{font-weight:900;color:var(--accent);font-size:13px;letter-spacing:.1em}.ov-serving{font-size:11px;color:#d8e4f2;margin-top:4px}.ov-history{grid-column:1/-1;display:flex;justify-content:center;gap:8px;padding:7px 10px;background:#0d1828;font-size:12px;font-weight:800;color:#c9d6e5}.ov-history span{padding:2px 8px;border-right:1px solid #40516a}.ov-timeout{color:var(--accent)}
-.hidden{display:none!important}
-@media(max-width:600px){main{padding:10px}.teams{gap:8px}.team{padding:10px}.team-head{align-items:flex-start}.score{margin:12px 0}.settings{grid-template-columns:1fr}.overlay-wrap{padding:3vw}.ov-team{padding:8px;gap:6px}.ov-center{min-width:78px;padding:5px}.ov-name{font-size:12px}.ov-score{font-size:32px}.ov-team .logo{width:28px;height:28px}.ov-set{font-size:10px}.ov-serving{font-size:9px}.ov-history{font-size:10px;gap:3px}}
-</style>
-</head>
-<body>
-<div id="controller">
-<header><div><strong>VOLLEYBALL LIVE</strong><br><small>Score controller · landscape broadcast</small></div><div class="status" id="syncStatus">Local preview mode</div></header>
-<main>
-<div class="toolbar">
-<button class="primary" id="overlayBtn">Open overlay view ↗</button>
-<button id="undoBtn">↶ Undo</button>
-<button id="resetBtn" class="danger">Reset match</button>
-</div>
-<section class="teams">
-<div class="team" id="homeCard">
- <div class="team-head"><div class="logo" id="homeLogo">H</div><div style="min-width:0;flex:1"><div class="team-name" id="homeTitle">HOME</div><div class="status" id="homeSets">0 SETS WON</div></div></div>
- <div class="score" id="homeScore">0</div>
- <div class="score-actions"><button class="good" id="homePlus">+ POINT</button><button id="homeMinus">− POINT</button></div>
- <div class="meta"><span id="homeTimeouts">Timeouts: 2</span><span id="homeServing"></span></div>
-</div>
-<div class="team away" id="awayCard">
- <div class="team-head"><div class="logo" id="awayLogo">A</div><div style="min-width:0;flex:1"><div class="team-name" id="awayTitle">AWAY</div><div class="status" id="awaySets">0 SETS WON</div></div></div>
- <div class="score" id="awayScore">0</div>
- <div class="score-actions"><button class="good" id="awayPlus">+ POINT</button><button id="awayMinus">− POINT</button></div>
- <div class="meta"><span id="awayTimeouts">Timeouts: 2</span><span id="awayServing"></span></div>
-</div>
-</section>
-<section class="card">
-<h2>Match control</h2>
-<div class="row" style="justify-content:space-between;margin-bottom:12px"><div><b id="setLabel">SET 1</b> <span class="status" id="matchStatus">· Best of 3</span></div><div class="sets" id="setHistory"></div></div>
-<div class="serve"><button id="serveHome">🏐 HOME SERVING</button><button id="serveAway">AWAY SERVING</button></div>
-<div class="row" style="margin-top:12px">
-<button id="homeTimeout">HOME TIMEOUT</button><button id="awayTimeout">AWAY TIMEOUT</button><button id="nextSet" class="primary">NEXT SET</button>
-</div>
-<p class="note">Standard rules: sets 1–4 to 25, deciding set to 15, win by 2. Change match format below if needed. Timeout counters reset at the start of each set.</p>
-</section>
-<section class="card">
-<h2>Teams & match setup</h2>
-<div class="settings">
-<div class="field"><label>HOME TEAM</label><input id="homeName" value="HOME" maxlength="24"></div>
-<div class="field"><label>AWAY TEAM</label><input id="awayName" value="AWAY" maxlength="24"></div>
-<div class="field"><label>HOME COLOR</label><input id="homeColor" type="color" value="#1769aa"></div>
-<div class="field"><label>AWAY COLOR</label><input id="awayColor" type="color" value="#a83245"></div>
-<div class="field"><label>HOME LOGO (image URL)</label><input id="homeLogoUrl" placeholder="https://..."></div>
-<div class="field"><label>AWAY LOGO (image URL)</label><input id="awayLogoUrl" placeholder="https://..."></div>
-<div class="field"><label>FORMAT</label><select id="format"><option value="3">Best of 3</option><option value="5">Best of 5</option></select></div>
-<div class="field"><label>POINTS (sets 1–4)</label><select id="target"><option>25</option><option>21</option><option>15</option></select></div>
-<div class="field"><label>DECIDING SET POINTS</label><select id="finalTarget"><option>15</option><option>25</option><option>21</option></select></div>
-<div class="field"><label>TIMEOUTS PER SET</label><select id="timeoutLimit"><option>2</option><option>1</option><option>3</option><option>0</option></select></div>
-<div class="wide row"><button class="primary" id="applySettings">Apply team & match settings</button><span class="status">Changes save in this browser.</span></div>
-</div>
-</section>
-<section class="card">
-<h2>PRISM Live setup</h2>
-<ol class="note" style="padding-left:20px;line-height:1.8">
-<li>Host this HTML page on a static HTTPS host such as GitHub Pages.</li>
-<li>Open the hosted page on your phone and use the controller.</li>
-<li>In PRISM, add a Web Browser / Web source and enter the same page URL with <b>?overlay=1</b> at the end.</li>
-<li>Set the source to fit your 16:9 landscape stream and place it along the bottom.</li>
-</ol>
-<p class="note"><b>Important:</b> This starter version syncs tabs in the same browser using local storage. PRISM's separate in-app browser may not share that storage. For reliable phone-to-PRISM syncing, a free cloud database connection (Firebase or Supabase) and hosting setup are needed; this file does not pretend to provide cross-app cloud sync out of the box.</p>
-<div class="row"><button id="copyOverlay">Copy overlay URL</button><button id="exportState">Export match backup</button><button id="importState">Import backup</button><input id="importFile" type="file" accept="application/json" class="hidden"></div>
-</section>
-</main>
-</div>
-<div id="overlayScreen" class="hidden">
-<div class="overlay-wrap"><div class="overlay">
-<div class="ov-team home"><div class="logo" id="ovHomeLogo">H</div><div style="min-width:0"><div class="ov-name" id="ovHomeName">HOME</div><div class="status" id="ovHomeTimeout"></div></div><div class="ov-score" id="ovHomeScore">0</div></div>
-<div class="ov-center"><div class="ov-set" id="ovSet">SET 1</div><div class="ov-serving" id="ovServe">● HOME SERVING</div></div>
-<div class="ov-team away"><div class="ov-score" id="ovAwayScore">0</div><div style="min-width:0"><div class="ov-name" id="ovAwayName">AWAY</div><div class="status" id="ovAwayTimeout"></div></div><div class="logo" id="ovAwayLogo">A</div></div>
-<div class="ov-history" id="ovHistory"></div>
-</div></div>
-</div>
-<script>
-const defaults=()=>({home:'HOME',away:'AWAY',homeColor:'#1769aa',awayColor:'#a83245',homeLogo:'',awayLogo:'',format:3,target:25,finalTarget:15,timeoutLimit:2,set:1,homeScore:0,awayScore:0,homeSets:0,awaySets:0,serve:'home',timeoutsHome:2,timeoutsAway:2,history:[],finished:false,undo:[]});
-let s=load()||defaults();
-function load(){try{return JSON.parse(localStorage.getItem('vb-live-state'))}catch(e){return null}}
-function save(){localStorage.setItem('vb-live-state',JSON.stringify(s));render()}
-function snapshot(){s.undo.push(JSON.stringify({...s,undo:[]}));if(s.undo.length>30)s.undo.shift()}
-function logo(el,url,letter){el.innerHTML='';if(url){let im=document.createElement('img');im.src=url;im.onerror=()=>{el.textContent=letter};el.append(im)}else el.textContent=letter}
-function render(){
- const $=id=>document.getElementById(id), setsNeeded=Math.ceil(s.format/2);
- $('homeTitle').textContent=s.home;$('awayTitle').textContent=s.away;$('homeScore').textContent=s.homeScore;$('awayScore').textContent=s.awayScore;
- $('homeSets').textContent=s.homeSets+' SETS WON';$('awaySets').textContent=s.awaySets+' SETS WON';
- $('homeTimeouts').textContent='Timeouts: '+s.timeoutsHome;$('awayTimeouts').textContent='Timeouts: '+s.timeoutsAway;
- $('homeServing').textContent=s.serve==='home'?'● SERVING':'';$('awayServing').textContent=s.serve==='away'?'● SERVING':'';
- $('setLabel').textContent='SET '+s.set;$('matchStatus').textContent=s.finished?'· MATCH COMPLETE':'· Best of '+s.format;
- $('homeCard').style.borderTopColor=s.homeColor;$('awayCard').style.borderTopColor=s.awayColor;
- document.documentElement.style.setProperty('--home',s.homeColor);document.documentElement.style.setProperty('--away',s.awayColor);
- logo($('homeLogo'),s.homeLogo,s.home.slice(0,1).toUpperCase());logo($('awayLogo'),s.awayLogo,s.away.slice(0,1).toUpperCase());
- $('serveHome').classList.toggle('active',s.serve==='home');$('serveAway').classList.toggle('active',s.serve==='away');
- $('nextSet').disabled=s.finished;$('nextSet').style.opacity=s.finished?'.4':'1';
- $('setHistory').innerHTML='';s.history.forEach((h,i)=>{let x=document.createElement('span');x.className='set-chip';x.textContent='S'+(i+1)+' '+h.h+'–'+h.a;$('setHistory').append(x)});
- $('ovHomeName').textContent=s.home;$('ovAwayName').textContent=s.away;$('ovHomeScore').textContent=s.homeScore;$('ovAwayScore').textContent=s.awayScore;$('ovSet').textContent='SET '+s.set;
- $('ovServe').textContent='● '+(s.serve==='home'?s.home:s.away)+' SERVING';$('ovHomeTimeout').textContent='TIMEOUTS '+s.timeoutsHome;$('ovAwayTimeout').textContent='TIMEOUTS '+s.timeoutsAway;
- logo($('ovHomeLogo'),s.homeLogo,s.home.slice(0,1).toUpperCase());logo($('ovAwayLogo'),s.awayLogo,s.away.slice(0,1).toUpperCase());
- $('ovHistory').innerHTML='';s.history.forEach((h,i)=>{let x=document.createElement('span');x.textContent='SET '+(i+1)+'  '+h.h+'–'+h.a;$('ovHistory').append(x)});
+
+:root{
+  --navy:#07111f;--navy2:#10233a;--gold:#f5c451;--blue:#36b6f4;--red:#ff647c;
+  --muted:#9fb2c8;--line:rgba(173,199,228,.16);--panel:rgba(16,34,56,.88);
+  --glow:0 18px 48px rgba(0,0,0,.32)
 }
-function point(team,delta){if(s.finished)return;snapshot();s[team+'Score']=Math.max(0,s[team+'Score']+delta);if(delta>0)s.serve=team;checkSet();save()}
-function checkSet(){let target=s.set===s.format?s.finalTarget:s.target, a=s.homeScore,b=s.awayScore;if(Math.max(a,b)>=target&&Math.abs(a-b)>=2){let winner=a>b?'home':'away';s[winner+'Sets']++;s.history.push({h:a,a:b});if(s[winner+'Sets']>=Math.ceil(s.format/2)){s.finished=true}else{s.set++;s.homeScore=0;s.awayScore=0;s.timeoutsHome=s.timeoutLimit;s.timeoutsAway=s.timeoutLimit;s.serve=winner}}}
-function timeout(team){if(s.finished)return;let k='timeouts'+(team==='home'?'Home':'Away');if(s[k]<=0)return;snapshot();s[k]--;save()}
-function nextSet(){if(s.finished)return;if(s.homeScore||s.awayScore){let target=s.set===s.format?s.finalTarget:s.target;if(Math.max(s.homeScore,s.awayScore)>=target&&Math.abs(s.homeScore-s.awayScore)>=2){checkSet()}else{if(!confirm('Current set is not complete. Start the next set anyway?'))return;snapshot();s.history.push({h:s.homeScore,a:s.awayScore});s.set++;s.homeScore=0;s.awayScore=0;s.timeoutsHome=s.timeoutLimit;s.timeoutsAway=s.timeoutLimit}}else return;save()}
-function reset(){if(!confirm('Reset the entire match?'))return;let keep={home:s.home,away:s.away,homeColor:s.homeColor,awayColor:s.awayColor,homeLogo:s.homeLogo,awayLogo:s.awayLogo,format:s.format,target:s.target,finalTarget:s.finalTarget,timeoutLimit:s.timeoutLimit};s={...defaults(),...keep,timeoutsHome:keep.timeoutLimit,timeoutsAway:keep.timeoutLimit};save()}
-document.getElementById('homePlus').onclick=()=>point('home',1);document.getElementById('awayPlus').onclick=()=>point('away',1);document.getElementById('homeMinus').onclick=()=>point('home',-1);document.getElementById('awayMinus').onclick=()=>point('away',-1);
-document.getElementById('serveHome').onclick=()=>{snapshot();s.serve='home';save()};document.getElementById('serveAway').onclick=()=>{snapshot();s.serve='away';save()};
-document.getElementById('homeTimeout').onclick=()=>timeout('home');document.getElementById('awayTimeout').onclick=()=>timeout('away');document.getElementById('nextSet').onclick=nextSet;document.getElementById('resetBtn').onclick=reset;
-document.getElementById('undoBtn').onclick=()=>{if(!s.undo.length)return;let old=JSON.parse(s.undo.pop());old.undo=s.undo;s=old;save()};
-document.getElementById('applySettings').onclick=()=>{snapshot();s.home=document.getElementById('homeName').value.trim()||'HOME';s.away=document.getElementById('awayName').value.trim()||'AWAY';s.homeColor=document.getElementById('homeColor').value;s.awayColor=document.getElementById('awayColor').value;s.homeLogo=document.getElementById('homeLogoUrl').value.trim();s.awayLogo=document.getElementById('awayLogoUrl').value.trim();s.format=+document.getElementById('format').value;s.target=+document.getElementById('target').value;s.finalTarget=+document.getElementById('finalTarget').value;s.timeoutLimit=+document.getElementById('timeoutLimit').value;s.timeoutsHome=s.timeoutLimit;s.timeoutsAway=s.timeoutLimit;save()};
-document.getElementById('overlayBtn').onclick=()=>window.open(location.href.split('?')[0]+'?overlay=1','vb-overlay');
-document.getElementById('copyOverlay').onclick=async()=>{let u=location.href.split('?')[0]+'?overlay=1';try{await navigator.clipboard.writeText(u);alert('Overlay URL copied: '+u)}catch(e){prompt('Copy this overlay URL',u)}};
-document.getElementById('exportState').onclick=()=>{let b=new Blob([JSON.stringify(s,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='volleyball-match-backup.json';a.click();URL.revokeObjectURL(a.href)};
-document.getElementById('importState').onclick=()=>document.getElementById('importFile').click();
-document.getElementById('importFile').onchange=e=>{let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{s=JSON.parse(r.result);save()}catch(x){alert('Invalid backup file')}};r.readAsText(f)};
-const overlay=new URLSearchParams(location.search).get('overlay')==='1';if(overlay){document.getElementById('controller').classList.add('hidden');document.getElementById('overlayScreen').classList.remove('hidden');document.body.style.background='transparent';document.documentElement.style.background='transparent'}
-if(!overlay){['homeName','awayName','homeColor','awayColor','homeLogoUrl','awayLogoUrl','format','target','finalTarget','timeoutLimit'].forEach(id=>{let map={homeName:'home',awayName:'away',homeColor:'homeColor',awayColor:'awayColor',homeLogoUrl:'homeLogo',awayLogoUrl:'awayLogo',format:'format',target:'target',finalTarget:'finalTarget',timeoutLimit:'timeoutLimit'};document.getElementById(id).value=s[map[id]]})}
-render();
-window.addEventListener('storage',e=>{if(e.key==='vb-live-state'){s=load()||s;render()}});
-if('BroadcastChannel'in window){let bc=new BroadcastChannel('vb-live-score');bc.onmessage=()=>{s=load()||s;render()};const oldSave=save;save=function(){localStorage.setItem('vb-live-state',JSON.stringify(s));bc.postMessage('update');render()}}
-</script>
-</body>
-</html>
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 50% -20%,#1b3c60 0%,#0a1728 48%,#060d18 100%);color:#f7fbff;font:15px Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial}
+button,input,select{font:inherit}
+button{border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:12px 16px;background:linear-gradient(180deg,#263f5e,#1a304a);color:#f6f9ff;font-weight:800;letter-spacing:.01em;box-shadow:0 5px 14px rgba(0,0,0,.16);transition:transform .16s ease,filter .16s ease,border-color .16s ease}
+button:hover{filter:brightness(1.14);transform:translateY(-1px);border-color:rgba(255,255,255,.22)}
+button:active{transform:translateY(1px)}
+button:disabled{opacity:.4;cursor:not-allowed;transform:none}
+button.primary{background:linear-gradient(135deg,#f7d16a,#e9a92c);color:#172338;border-color:#ffe19a}
+button.good{background:linear-gradient(135deg,#159a76,#087357)}
+button.danger{background:linear-gradient(135deg,#a83c58,#76283f)}
+header{padding:17px 20px;border-bottom:1px solid var(--line);background:rgba(5,14,25,.56);backdrop-filter:blur(18px);font-size:12px;letter-spacing:.16em;color:#dce9f8}
+header b{font-weight:950}
+main{max-width:1080px;margin:auto;padding:20px;display:grid;gap:16px}
+.toolbar,.row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.card,.team{background:linear-gradient(145deg,rgba(21,43,68,.94),rgba(10,25,43,.94));border:1px solid var(--line);border-radius:20px;padding:17px;box-shadow:var(--glow);backdrop-filter:blur(16px)}
+.teams{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.team{border-top:3px solid var(--blue);position:relative;overflow:hidden}
+.team:after{content:"";position:absolute;inset:0 0 auto;height:100px;background:linear-gradient(180deg,rgba(255,255,255,.045),transparent);pointer-events:none}
+.team.away{border-top-color:var(--red)}
+.head{display:flex;align-items:center;gap:11px;position:relative;z-index:1}
+.logo{width:46px;height:46px;display:grid;place-items:center;background:linear-gradient(145deg,#0a1728,#1b3451);border:1px solid rgba(255,255,255,.12);border-radius:13px;color:var(--gold);font-weight:950;overflow:hidden;flex:none}
+.logo img{width:100%;height:100%;object-fit:cover}
+.name{font-weight:900;font-size:19px;letter-spacing:.015em}
+.score{font-size:clamp(58px,8vw,78px);line-height:1;text-align:center;font-weight:950;margin:19px 0 17px;font-variant-numeric:tabular-nums;letter-spacing:-.055em;text-shadow:0 8px 25px #0005}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.actions button{font-size:15px;padding:13px 10px}
+.meta{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:11px;margin-top:13px;font-weight:750;letter-spacing:.04em}
+.card h2{font-size:11px;letter-spacing:.18em;color:#a9bdd4;margin:0 0 14px;font-weight:900}
+.settings{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{display:grid;gap:7px}
+.field label{font-size:10px;color:#a9bdd4;letter-spacing:.13em;font-weight:850}
+input,select{width:100%;padding:12px 13px;border-radius:11px;border:1px solid rgba(173,199,228,.2);background:rgba(4,14,26,.72);color:#fff;outline:none;transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus{border-color:#48bdf2;box-shadow:0 0 0 3px rgba(54,182,244,.14)}
+input[type=color]{padding:4px;height:43px}
+.wide{grid-column:1/-1}
+.serve{display:flex;gap:9px}
+.serve button{flex:1}
+.active{outline:2px solid var(--gold);outline-offset:2px}
+.chip{background:rgba(66,105,145,.25);border:1px solid var(--line);border-radius:9px;padding:7px 10px;font-size:11px;font-weight:800}
+.note{font-size:12px;line-height:1.6;color:#9fb2c8}
+.hidden{display:none!important}
+
+
+/* ESPN-style broadcast scorebug: thin banner */
+#overlayScreen{position:fixed;inset:0;background:transparent;pointer-events:none}
+.stage{position:absolute;bottom:4%;left:3%;font-size:clamp(9px,1.15vw,22px)}
+.stage[data-pos=center]{left:50%;transform:translateX(-50%)}
+.stage[data-pos=right]{left:auto;right:3%}
+.bug{display:flex;align-items:stretch;height:3.2em;color:#1b1f24;border-radius:.2em;overflow:hidden;
+ font-family:"Barlow Semi Condensed","Roboto Condensed","Arial Narrow",Arial,sans-serif;
+ background:linear-gradient(180deg,#ffffff 0%,#ececed 16%,#d8d9dc 52%,#b9bbc0 100%);
+ box-shadow:0 .3em .9em rgba(0,0,0,.5),inset 0 .09em 0 rgba(255,255,255,.95),inset 0 -.2em .4em rgba(0,0,0,.28),inset 0 0 .6em rgba(0,0,0,.14);
+ animation:enter .6s cubic-bezier(.2,.8,.2,1) both}
+.tm{display:flex;align-items:center;padding:0 .6em 0 .55em}
+.tm+.tm{border-left:.06em solid rgba(0,0,0,.22);box-shadow:inset .06em 0 0 rgba(255,255,255,.75)}
+.tm{text-shadow:0 .05em 0 rgba(255,255,255,.65)}
+.tm.home{--c:var(--hc,#1769aa);--k:var(--hk,#fff)}
+.tm.away{--c:var(--ac,#b72b3c);--k:var(--ak,#fff)}
+.tlogo{flex:none;width:2.4em;height:2.4em;margin-right:.55em;display:grid;place-items:center;border-radius:50%;background:var(--c);color:var(--k);font-size:1.15em;font-weight:700;overflow:hidden;box-shadow:0 .12em .3em rgba(0,0,0,.45),inset 0 .08em .12em rgba(255,255,255,.35),inset 0 -.12em .2em rgba(0,0,0,.3);text-shadow:0 .05em .1em rgba(0,0,0,.4)}
+.tlogo.img{background:none;border-radius:0}
+.tlogo img{width:100%;height:100%;object-fit:contain}
+.tinfo{display:flex;flex-direction:column;justify-content:center;min-width:8.5em;max-width:16em}
+.tline{display:flex;align-items:baseline;gap:.3em;font-size:1.3em;line-height:1.05;white-space:nowrap}
+.tline.long{font-size:1.1em}
+.tline.xlong{font-size:1em}
+.rk{font-size:.8em;font-weight:600;color:#4a4f55}
+.nm{font-weight:600;overflow:hidden;text-overflow:ellipsis}
+.rk:empty{display:none}
+.sv{flex:none;align-self:center;width:0;height:0;margin-left:.2em;border-style:solid;border-width:.28em .42em .28em 0;border-color:transparent #1b1f24 transparent transparent;visibility:hidden}
+.sv.on{visibility:visible}
+.dash{display:flex;gap:.3em;margin:.2em 0 .12em}
+.dash i{width:1em;height:.2em;border-radius:.05em;background:var(--c)}
+.dash i.used{opacity:.22}
+.dash:empty{display:none}
+.rec{font-size:.74em;font-weight:500;letter-spacing:.02em;color:#4a4f55;white-space:nowrap}
+.rec:empty{display:none}
+.sc{min-width:.95em;margin-left:.45em;text-align:center;font-size:2.15em;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.stat{display:flex;align-items:center;gap:.6em;padding:0 1em;margin-left:.3em;background:linear-gradient(180deg,#f2f3f4,#fdfdfd);border-left:.08em solid rgba(0,0,0,.3);box-shadow:inset 0 .22em .45em rgba(0,0,0,.22),inset .1em 0 .3em rgba(0,0,0,.12),inset 0 -.07em 0 rgba(255,255,255,.9);text-shadow:0 .05em 0 rgba(255,255,255,.8);font-size:1.15em;font-weight:600;letter-spacing:.02em;text-transform:uppercase;white-space:nowrap}
+.pill{padding:.18em .6em;border-radius:.2em;background:#d4151d;color:#fff;font-size:.72em;font-weight:700;letter-spacing:.08em;animation:blink 1.4s ease-in-out infinite}
+.pill:empty{display:none}
+.pill.match{background:#f5b800;color:#1a1400}
+.flash{animation:pop .5s ease-out}
+@keyframes pop{0%{transform:scale(1.3);color:#d4151d}100%{transform:scale(1)}}
+@keyframes enter{from{opacity:0;transform:translateY(1.4em)}}
+@keyframes blink{50%{opacity:.7}}
+#dbg{position:fixed;top:.5em;left:.5em;z-index:9;padding:.3em .6em;border-radius:4px;background:rgba(0,0,0,.78);color:#7cfc9a;font:12px/1.4 monospace}
+.recap{position:absolute;left:0;right:0;bottom:100%;margin-bottom:.55em;border-radius:.3em;overflow:hidden;color:#1b1f24;
+ font-family:"Barlow Semi Condensed","Roboto Condensed","Arial Narrow",Arial,sans-serif;box-shadow:0 .3em .9em rgba(0,0,0,.5)}
+.recap.hidden{display:none}
+.recap.in{animation:rcIn .5s cubic-bezier(.2,.8,.2,1) both}
+.recap.out{animation:rcOut .4s ease-in both}
+@keyframes rcIn{from{opacity:0;transform:translateY(1em)}}
+@keyframes rcOut{to{opacity:0;transform:translateY(.6em)}}
+.rc-head{display:flex;justify-content:space-between;align-items:center;gap:1.2em;padding:.45em .9em;background:linear-gradient(180deg,#1f262e,#0f1318);color:#fff;border-left:.22em solid #d4151d;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+.recap.final .rc-head{border-left-color:#f5b800}
+.rc-title{font-size:1.2em;font-weight:800}
+.recap.final .rc-title{color:#f5b800}
+.rc-sub{font-size:.9em;font-weight:600;color:#c9d1d9}
+.rc-body{padding:.3em 0 .35em;background:linear-gradient(180deg,#ffffff 0%,#ececed 18%,#d8d9dc 55%,#bfc1c5 100%);box-shadow:inset 0 -.2em .4em rgba(0,0,0,.2)}
+.rc-row{display:grid;grid-template-columns:.3em 1.9em minmax(5em,1fr) repeat(var(--n),2.4em) 2.8em;align-items:center;gap:0 .55em;height:2.2em;padding-right:.8em;text-shadow:0 .05em 0 rgba(255,255,255,.65)}
+.rc-row.cols{height:1.35em}
+.rc-row.cols span{font-size:.72em;font-weight:700;letter-spacing:.1em;color:#5a6068;text-align:center}
+.rc-row.cols span:nth-child(3){text-align:left}
+.rc-bar{align-self:stretch;background:var(--c)}
+.rc-logo{position:relative;display:grid;place-items:center;width:1.9em;height:1.9em;border-radius:50%;background:var(--c);color:var(--k);font-weight:700;overflow:hidden;text-shadow:none}
+.rc-logo img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#f4f6f8}
+.rc-name{font-size:1.3em;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rc-s{text-align:center;font-size:1.35em;font-weight:500;color:#6b7178;font-variant-numeric:tabular-nums}
+.rc-s.w{font-weight:800;color:#1b1f24}
+.rc-tot{text-align:center;font-size:1.7em;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.rc-tot.l{font-weight:600;color:#6b7178}
+.timeout{position:absolute;left:0;right:0;bottom:100%;margin-bottom:.55em;border-radius:.3em;overflow:hidden;color:var(--k);background:var(--c);
+ font-family:"Barlow Semi Condensed","Roboto Condensed","Arial Narrow",Arial,sans-serif;box-shadow:0 .3em .9em rgba(0,0,0,.5)}
+@supports (background:color-mix(in srgb,red,blue)){
+ .timeout{background:linear-gradient(180deg,color-mix(in srgb,var(--c),#fff 16%),var(--c) 50%,color-mix(in srgb,var(--c),#000 22%))}
+}
+.timeout.hidden{display:none}
+.timeout.in{animation:rcIn .5s cubic-bezier(.2,.8,.2,1) both}
+.timeout.out{animation:rcOut .4s ease-in both}
+.to-main{display:flex;align-items:center;gap:.8em;padding:.5em .9em}
+.to-logo{position:relative;flex:none;display:grid;place-items:center;width:2.9em;height:2.9em;border-radius:50%;background:#f4f6f8;color:var(--lc,var(--c));font-size:1.1em;font-weight:800;overflow:hidden;box-shadow:0 .1em .3em rgba(0,0,0,.4)}
+.to-logo img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#f4f6f8}
+.to-txt{flex:1;min-width:0}
+.to-tag{font-size:.85em;font-weight:700;letter-spacing:.14em;opacity:.92}
+.to-name{font-size:1.8em;font-weight:800;line-height:1.05;text-transform:uppercase;letter-spacing:.02em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.to-clock{min-width:2.4em;padding:.05em .4em;border-radius:.15em;background:rgba(0,0,0,.42);color:#fff;font-size:3em;font-weight:800;line-height:1.1;text-align:center;font-variant-numeric:tabular-nums}
+.timeout.low .to-clock{background:#d4151d;animation:blink .8s ease-in-out infinite}
+.to-bar{height:.35em;background:rgba(0,0,0,.35)}
+.to-bar i{display:block;height:100%;width:100%;background:#fff;opacity:.92}
+@media (prefers-reduced-motion:reduce){.bug,.flash,.pill,.recap,.timeout,.to-clock{animation:none}}
+.tlrow{display:flex;align-items:center;gap:8px;padding:10px 0;border-top:1px solid rgba(173,199,228,.14)}
+.tlrow:first-child{margin-top:14px}
+.tlsw{flex:none;width:12px;height:38px;border-radius:4px}
+.tln{flex:1;min-width:0}
+.tln b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tln small{color:#9fb2c8}
+.tlrow button{flex:none;padding:9px 11px;font-size:12px}
+
+
+#playGraphic{position:absolute;right:calc(100% + .65em);bottom:0;width:7.6em;height:3.2em;z-index:5;pointer-events:none;filter:drop-shadow(0 .15em .3em #0009)}
+#playGraphic svg{width:100%;height:100%;overflow:visible}
+#playGraphic.run{animation:acePlay 3s both}
+#playGraphic.ace{animation:acePlay 3s both}
+#playGraphic.block{animation:blockPlay 3s both}
+#playGraphic.above{right:auto;left:0;bottom:calc(100% + .65em)}
+@keyframes acePlay{0%{opacity:0;transform:translateX(-35%) scale(.65)}12%{opacity:1;transform:scale(1.12)}22%,88%{opacity:1;transform:none}100%{opacity:0;transform:translateX(-15%)}}
+@keyframes blockPlay{0%{opacity:0;transform:translateY(-65%) scale(1.2)}12%{opacity:1;transform:translateX(-5%)}16%{transform:translateX(5%)}20%,88%{opacity:1;transform:none}100%{opacity:0;transform:scale(.9)}}
+#playGraphic.block .fragment{animation:brickFly .65s ease-out both}
+@keyframes brickFly{from{opacity:1;transform:translate(0,0)}to{opacity:0;transform:translate(var(--dx),-24px) rotate(35deg)}}
+#aceBtn{background:#a70d18;color:white}#blockBtn{background:#88432e;color:white}
+@media(prefers-reduced-motion:reduce){#playGraphic.run,#playGraphic.ace,#playGraphic.block,#playGraphic .fragment{animation:none}}
+</style></head><body>
+<div id="controller"><header><b>VOLLEYBALL LIVE · BROADCAST CONTROL</b></header><main>
+<div class="toolbar"><button class="primary" id="openOverlay">Open broadcast overlay ↗</button><button id="undo">↶ Undo</button><button class="danger" id="reset">Reset match</button></div>
+<section class="teams">
+<div class="team" id="hc"><div class="head"><div class="logo" id="hl">H</div><div><div class="name" id="hn">HOME</div><small id="hs">0 SETS WON</small></div></div><div class="score" id="hscore">0</div><div class="actions"><button class="good" id="hp">+ POINT</button><button id="hm">− POINT</button></div><div class="meta"><span id="ht">Timeouts: 2</span><span id="hserve"></span></div></div>
+<div class="team away" id="ac"><div class="head"><div class="logo" id="al">A</div><div><div class="name" id="an">AWAY</div><small id="as">0 SETS WON</small></div></div><div class="score" id="ascore">0</div><div class="actions"><button class="good" id="ap">+ POINT</button><button id="am">− POINT</button></div><div class="meta"><span id="at">Timeouts: 2</span><span id="aserve"></span></div></div></section>
+<section class="card"><h2>MATCH CONTROL</h2><div class="row"><b id="setlabel">SET 1</b><span id="formatlabel">Best of 3</span><div class="row" id="history"></div></div><p class="serve"><button id="sh">🏐 HOME SERVING</button><button id="sa">AWAY SERVING</button></p><div class="row"><button id="th">HOME TIMEOUT</button><button id="ta">AWAY TIMEOUT</button><button class="primary" id="next">NEXT SET</button></div><div class="row"><button id="recapBtn">SHOW RECAP CARD</button><button id="endTo">END TIMEOUT CLOCK</button></div><p class="note">Sets 1–4 to 25, deciding set to 15, win by 2. Timeout counters reset each set.</p></section>
+<section class="card"><h2>LIVE PLAY GRAPHICS</h2><div class="row"><button id="aceBtn">ACE!</button><button id="blockBtn">BLOCK!</button></div><p class="note">Show a three-second graphic without changing the score.</p></section><section class="card"><h2>TEAM LIBRARY</h2><div class="settings">
+<div class="field"><label>TEAM NAME</label><input id="tlName" maxlength="40"></div><div class="field"><label>RANK (OPTIONAL)</label><input id="tlRank" maxlength="3" placeholder="e.g. 14"></div>
+<div class="field"><label>RECORD (OPTIONAL)</label><input id="tlRecord" maxlength="20" placeholder="34-12"></div><div class="field"><label>COLOR</label><input id="tlColor" type="color" value="#1769aa"></div>
+<div class="field wide"><label>LOGO URL (OPTIONAL)</label><input id="tlLogo" placeholder="https://..."></div>
+<div class="wide"><button class="primary" id="tlSave">Save team</button> <button id="tlClear">Clear form</button></div></div>
+<div id="tlList"></div>
+<p class="note">Tap HOME or AWAY to put a saved team on the scorebug right away. If you edit a team that's already on the banner, tap HOME or AWAY again to refresh it. Saved teams live in this browser, so add them on the device you control the score from.</p></section>
+<section class="card"><h2>TEAMS & MATCH SETTINGS</h2><div class="settings">
+<div class="field"><label>HOME TEAM</label><input id="homeName" maxlength="40"></div><div class="field"><label>AWAY TEAM</label><input id="awayName" maxlength="40"></div>
+<div class="field"><label>HOME COLOR</label><input id="homeColor" type="color"></div><div class="field"><label>AWAY COLOR</label><input id="awayColor" type="color"></div>
+<div class="field"><label>HOME LOGO URL</label><input id="homeLogo" placeholder="https://..."></div><div class="field"><label>AWAY LOGO URL</label><input id="awayLogo" placeholder="https://..."></div>
+<div class="field"><label>HOME RANK (OPTIONAL)</label><input id="homeRank" maxlength="3" placeholder="e.g. 2"></div><div class="field"><label>AWAY RANK (OPTIONAL)</label><input id="awayRank" maxlength="3" placeholder="e.g. 24"></div>
+<div class="field"><label>HOME RECORD (OPTIONAL)</label><input id="homeRecord" maxlength="20" placeholder="27-1 (17-1)"></div><div class="field"><label>AWAY RECORD (OPTIONAL)</label><input id="awayRecord" maxlength="20" placeholder="19-9 (12-6)"></div>
+<div class="field"><label>FORMAT</label><select id="format"><option value="3">Best of 3</option><option value="5">Best of 5</option></select></div><div class="field"><label>SETS 1–4 TARGET</label><select id="target"><option>25</option><option>21</option><option>15</option></select></div>
+<div class="field"><label>DECIDING SET TARGET</label><select id="finalTarget"><option>15</option><option>25</option><option>21</option></select></div><div class="field"><label>TIMEOUTS PER SET</label><select id="timeoutLimit"><option>2</option><option>1</option><option>3</option><option>0</option></select></div>
+<div class="field"><label>SET RECAP CARD</label><select id="recapMode"><option value="on">Auto-show after each set</option><option value="off">Off (button only)</option></select></div>
+<div class="field"><label>TIMEOUT CLOCK</label><select id="toMode"><option value="30">30-second countdown</option><option value="60">60-second countdown</option><option value="0">Off</option></select></div>
+<div class="wide"><button class="primary" id="apply">Apply settings</button></div></div></section>
+<section class="card"><h2>FIREBASE LIVE SYNC</h2><div class="settings"><div class="field"><label>CONTROLLER EMAIL</label><input id="fbEmail" type="email" autocomplete="username" placeholder="Firebase account email"></div><div class="field"><label>PASSWORD</label><input id="fbPassword" type="password" autocomplete="current-password" placeholder="Firebase password"></div></div><div class="row" style="margin-top:10px"><button class="primary" id="fbLogin">Sign in &amp; sync</button><button id="fbLogout">Sign out</button><span class="chip" id="fbStatus">Not connected</span></div><p class="note">Sign in here on the device you use to control the score. The PRISM browser overlay connects automatically and receives live updates. Firebase Realtime Database must allow public reads and authenticated writes.</p></section><section class="card"><h2>PRISM LIVE & BACKUP</h2><p class="note">In PRISM, add a Web Browser source using your GitHub Pages URL followed by <b>?overlay=1</b>. The banner sits at the bottom-left by default; add <b>&amp;pos=center</b> or <b>&amp;pos=right</b> to move it. Match data syncs through Firebase when the controller is signed in; local browser storage remains as a backup.</p><div class="row"><button id="copy">Copy overlay URL</button><button id="export">Export backup</button><button id="import">Import backup</button><input id="file" type="file" accept="application/json" hidden></div><p class="note">Page version: <b id="ver"></b></p></section>
+</main></div>
+<div id="overlayScreen" class="hidden"><div id="dbg" class="hidden"></div><div class="stage" data-pos="left"><div class="recap hidden" id="recap"></div><div class="timeout hidden" id="timeout"></div><div id="playGraphic" class="hidden" aria-hidden="true"></div><div class="bug" id="bug">
+<div class="tm home"><div class="tlogo" id="ohl">H</div><div class="tinfo"><div class="tline"><span class="rk" id="ohr"></span><span class="nm" id="ohn">HOME</span><i class="sv" id="ohserve"></i></div><div class="dash" id="oht"></div><div class="rec" id="ohrec"></div></div><div class="sc" id="ohscore">0</div></div>
+<div class="tm away"><div class="tlogo" id="oal">A</div><div class="tinfo"><div class="tline"><span class="rk" id="oar"></span><span class="nm" id="oan">AWAY</span><i class="sv" id="oaserve"></i></div><div class="dash" id="oat"></div><div class="rec" id="oarec"></div></div><div class="sc" id="oascore">0</div></div>
+<div class="stat"><span class="pill" id="opoint"></span><span id="oseries"></span></div>
+</div></div></div>
+<script>
+const D=()=>({home:'HOME',away:'AWAY',homeColor:'#1769aa',awayColor:'#b72b3c',homeLogo:'',awayLogo:'',homeRank:'',awayRank:'',homeRecord:'',awayRecord:'',format:3,target:25,finalTarget:15,timeoutLimit:2,recapMode:'on',recapN:0,playEvent:null,homeRun:0,toMode:30,toN:0,toEndN:0,toTeam:'home',toLen:30,set:1,homeScore:0,awayScore:0,homeSets:0,awaySets:0,serve:'home',timeoutsHome:2,timeoutsAway:2,history:[],finished:false,undo:[]});
+const $=id=>document.getElementById(id);function load(){try{return JSON.parse(localStorage.getItem('vb-live-state'))}catch(e){return null}}let s={...D(),...(load()||{})};
+function logo(el,url,letter){el.innerHTML='';if(url){let i=document.createElement('img');i.src=url;i.onerror=()=>el.textContent=letter;el.append(i)}else el.textContent=letter}
+function ink(hex){let h=String(hex).replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');let r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);return (r*299+g*587+b*114)/1000>150?'#10151a':'#fff'}
+function ticks(el,left,limit){el.innerHTML=Array.from({length:limit},(_,i)=>'<i'+(i>=left?' class="used"':'')+'></i>').join('')}
+function ologo(el,url,letter){let k=(url||'')+'|'+letter;if(el.dataset.k===k)return;el.dataset.k=k;el.className='tlogo';el.textContent=letter;if(url){let i=new Image();i.onload=()=>{if(el.dataset.k!==k)return;el.textContent='';el.classList.add('img');el.append(i)};i.src=url}}
+function short(n){return n.length>12?n.slice(0,12).trim()+'\u2026':n}
+function series(){let b='(BEST OF '+s.format+')',h=s.homeSets,a=s.awaySets;if(s.finished)return 'FINAL: '+short(h>a?s.home:s.away)+' WINS '+Math.max(h,a)+'-'+Math.min(h,a);if(!h&&!a)return 'SET '+s.set+' '+b;if(h===a)return 'TIED '+h+'-'+a+' '+b;return short(h>a?s.home:s.away)+' LEADS '+Math.max(h,a)+'-'+Math.min(h,a)+' '+b}
+function autoRecap(){if(s.recapMode!=='off')s.recapN=(s.recapN||0)+1}
+const VER='2026-11-27 firebase+recap+timeout+play graphics + home run v5',dbg=new URLSearchParams(location.search).get('debug')==='1';
+let seenRecap=null,rcT1,rcT2;
+function hideRecap(){clearTimeout(rcT1);clearTimeout(rcT2);let el=$('recap');if(el.classList.contains('hidden'))return;el.classList.remove('in');el.classList.add('out');rcT2=setTimeout(()=>{el.className='recap hidden'},400)}
+function rcLogo(url,letter){return esc(letter)+(url?'<img src="'+esc(url)+'" alt="" onerror="this.remove()">':'')}
+function showRecap(){if(!s.history.length)return;hideTimeout(true);clearTimeout(rcT1);clearTimeout(rcT2);
+ let el=$('recap'),n=s.history.length,fin=s.finished,hc=s.homeColor||'#1769aa',ac=s.awayColor||'#b72b3c',
+ cells=side=>s.history.map(x=>{let me=side==='h'?x.h:x.a,op=side==='h'?x.a:x.h;return '<span class="rc-s'+(me>op?' w':'')+'">'+me+'</span>'}).join(''),
+ row=(side,name,url,color,sets,other)=>'<div class="rc-row" style="--c:'+esc(color)+';--k:'+ink(color)+';--n:'+n+'"><i class="rc-bar"></i><span class="rc-logo">'+rcLogo(url,(name||'?')[0].toUpperCase())+'</span><span class="rc-name">'+esc(name)+'</span>'+cells(side)+'<span class="rc-tot'+(sets<other?' l':'')+'">'+sets+'</span></div>',
+ cols='<div class="rc-row cols" style="--n:'+n+'"><i></i><span></span><span>SET</span>'+s.history.map((_,i)=>'<span>'+(i+1)+'</span>').join('')+'<span>SETS</span></div>';
+ el.innerHTML='<div class="rc-head"><span class="rc-title">'+(fin?'FINAL':'SET '+n+' FINAL')+'</span><span class="rc-sub">'+esc(series().replace(/^FINAL: /,'').replace(/ \(BEST OF \d+\)$/,''))+'</span></div><div class="rc-body">'+cols+row('h',s.home,s.homeLogo,hc,s.homeSets,s.awaySets)+row('a',s.away,s.awayLogo,ac,s.awaySets,s.homeSets)+'</div>';
+ el.className='recap in'+(fin?' final':'');rcT1=setTimeout(hideRecap,fin?30000:9000)}
+let seenTo=null,seenToEnd=null,toTick,toTok=0;
+function hideTimeout(instant){clearInterval(toTick);let el=$('timeout');if(el.classList.contains('hidden'))return;if(instant){el.className='timeout hidden';return}el.classList.remove('in','low');el.classList.add('out');setTimeout(()=>{if(el.classList.contains('out'))el.className='timeout hidden'},400)}
+function startTimeout(){clearTimeout(rcT1);clearTimeout(rcT2);$('recap').className='recap hidden';clearInterval(toTick);
+ let el=$('timeout'),side=s.toTeam==='away'?'away':'home',name=side==='home'?s.home:s.away,color=(side==='home'?s.homeColor:s.awayColor)||(side==='home'?'#1769aa':'#b72b3c'),url=side==='home'?s.homeLogo:s.awayLogo,left=side==='home'?s.timeoutsHome:s.timeoutsAway,len=s.toLen||30,end=Date.now()+len*1000,tok=++toTok;
+ el.style.setProperty('--c',color);el.style.setProperty('--k',ink(color));el.style.setProperty('--lc',ink(color)==='#fff'?color:'#10151a');
+ el.innerHTML='<div class="to-main"><span class="to-logo">'+rcLogo(url,(name||'?')[0].toUpperCase())+'</span><div class="to-txt"><div class="to-tag">TIMEOUT \u00b7 '+(left?left+' LEFT':'NONE LEFT')+'</div><div class="to-name">'+esc(name)+'</div></div><div class="to-clock" id="toClock"></div></div><div class="to-bar"><i id="toBar"></i></div>';
+ el.className='timeout in';
+ let tick=()=>{let r=Math.max(0,(end-Date.now())/1000),sec=Math.ceil(r);$('toClock').textContent=Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0');$('toBar').style.width=(r/len*100)+'%';el.classList.toggle('low',sec<=10&&sec>0);if(r<=0){clearInterval(toTick);setTimeout(()=>{if(tok===toTok)hideTimeout()},1500)}};
+ tick();toTick=setInterval(tick,200)}
+function snap(){s.undo.push(JSON.stringify({...s,undo:[]}));if(s.undo.length>30)s.undo.shift()}
+function state(){if(s.finished)return'FINAL';let n=Math.ceil(s.format/2),t=s.set===s.format?s.finalTarget:s.target,h=s.homeScore,a=s.awayScore,hs=h>=t-1&&h-a>=1,as=a>=t-1&&a-h>=1;if(hs&&s.homeSets===n-1||as&&s.awaySets===n-1)return'MATCH POINT';return hs||as?'SET POINT':''}
+
+let seenPlay='',playTimer;
+const playArt={ace:`<svg viewBox="0 0 120 52"><defs><linearGradient id="aceGrad" x2="0" y2="1"><stop stop-color="#ff4545"/><stop offset="1" stop-color="#980000"/></linearGradient></defs><path d="M0 8L118 0 108 51 0 44Z" fill="#ff2222" opacity=".3"/><path d="M4 9L114 3 105 46 4 41Z" fill="url(#aceGrad)" stroke="#ff6666"/><path d="M4 16L116 6 100 15 4 27Z" fill="#ff7777"/><text x="57" y="35" text-anchor="middle" font-family="Arial,sans-serif" font-size="34" font-weight="900" font-style="italic" fill="white" stroke="#171717" stroke-width="2" paint-order="stroke">ACE!</text></svg>`,block:`<svg viewBox="0 0 120 52"><defs><pattern id="bricks" width="32" height="20" patternUnits="userSpaceOnUse"><rect width="32" height="20" fill="#a94b36"/><path d="M0 0H32M0 10H32M0 20H32M16 0V10M0 10V20M32 10V20" stroke="#d5c5b5" stroke-width="1.5"/><path d="M2 2H14M18 2H30M2 12H30" stroke="#e68b68" opacity=".6"/></pattern></defs><path d="M2 5H36V1H80V5H118V46H98V51H15V46H2Z" fill="url(#bricks)" stroke="#693528"/><path d="M60 1L54 13 65 22 50 35 58 51M65 22L89 12 96 3" stroke="#44271f" stroke-width="2" fill="none"/><rect class="fragment" x="5" y="3" width="8" height="6" fill="#b04b36" style="--dx:-18px"/><rect class="fragment" x="106" y="3" width="8" height="6" fill="#b04b36" style="--dx:18px"/><text x="60" y="35" text-anchor="middle" font-family="Arial,sans-serif" font-size="27" font-weight="900" font-style="italic" fill="white" stroke="#171717" stroke-width="3" paint-order="stroke">BLOCK!</text></svg>`};
+playArt.run=`<svg viewBox="0 0 120 52"><path d="M0 49L4 15 17 22 26 3 39 17 51 0 63 15 78 4 90 19 115 7 120 49Z" fill="currentColor" opacity=".65"/><path d="M3 48L10 16 115 11 118 49Z" fill="currentColor" stroke="white" stroke-opacity=".65"/><g fill="white" stroke="#171717" stroke-width="2" paint-order="stroke" font-family="Arial,sans-serif" font-weight="900" font-style="italic" text-anchor="middle"><text x="60" y="31" font-size="29">5–0</text><text x="60" y="45" font-size="14" letter-spacing="2">RUN!</text></g></svg>`;
+function renderPlay(){const e=s.playEvent,el=$('playGraphic');if(!e||!playArt[e.kind]||!e.id||Date.now()-e.at>3000||Date.now()-e.at< -10000)return;if(e.id===seenPlay)return;seenPlay=e.id;clearTimeout(playTimer);el.className='hidden';el.style.color=e.kind==='run'&&/^#[0-9a-f]{6}$/i.test(e.color)?e.color:'';el.innerHTML=playArt[e.kind];void el.offsetWidth;const room=$('bug').getBoundingClientRect().left,needed=parseFloat(getComputedStyle(el.parentElement).fontSize)*8.5;el.className=e.kind+(room<needed?' above':'');playTimer=setTimeout(()=>{el.className='hidden'},3000)}
+function makePlay(kind){return {kind,id:Date.now()+'-'+Math.random().toString(36).slice(2),at:Date.now(),...(kind==='run'?{color:s.homeColor}:{})}}
+function triggerPlay(kind){s.playEvent=makePlay(kind);save()}
+$('aceBtn').onclick=()=>triggerPlay('ace');$('blockBtn').onclick=()=>triggerPlay('block');
+
+function render(changed){$('hn').textContent=s.home;$('an').textContent=s.away;$('hscore').textContent=s.homeScore;$('ascore').textContent=s.awayScore;$('hs').textContent=s.homeSets+' SETS WON';$('as').textContent=s.awaySets+' SETS WON';$('ht').textContent='Timeouts: '+s.timeoutsHome;$('at').textContent='Timeouts: '+s.timeoutsAway;$('hserve').textContent=s.serve==='home'?'● SERVING':'';$('aserve').textContent=s.serve==='away'?'● SERVING':'';$('setlabel').textContent='SET '+s.set;$('formatlabel').textContent=s.finished?'MATCH COMPLETE':'Best of '+s.format;$('hc').style.borderTopColor=s.homeColor;$('ac').style.borderTopColor=s.awayColor;document.documentElement.style.setProperty('--blue',s.homeColor);document.documentElement.style.setProperty('--red',s.awayColor);logo($('hl'),s.homeLogo,s.home[0].toUpperCase());logo($('al'),s.awayLogo,s.away[0].toUpperCase());$('sh').classList.toggle('active',s.serve==='home');$('sa').classList.toggle('active',s.serve==='away');$('next').disabled=s.finished;$('history').innerHTML='';s.history.forEach((x,i)=>{let e=document.createElement('span');e.className='chip';e.textContent='S'+(i+1)+' '+x.h+'–'+x.a;$('history').append(e)});
+const ovs=$('overlayScreen').style,hc=s.homeColor||'#1769aa',ac=s.awayColor||'#b72b3c',st=s.finished?'':state();
+ovs.setProperty('--hc',hc);ovs.setProperty('--hk',ink(hc));ovs.setProperty('--ac',ac);ovs.setProperty('--ak',ink(ac));
+$('ohn').textContent=s.home;$('oan').textContent=s.away;[['ohn',s.home],['oan',s.away]].forEach(([i,n])=>{let c=$(i).parentElement.classList;c.toggle('long',n.length>18&&n.length<=22);c.toggle('xlong',n.length>22)});$('ohr').textContent=s.homeRank||'';$('oar').textContent=s.awayRank||'';$('ohrec').textContent=s.homeRecord||'';$('oarec').textContent=s.awayRecord||'';
+$('ohscore').textContent=s.homeScore;$('oascore').textContent=s.awayScore;
+$('ohserve').classList.toggle('on',s.serve==='home'&&!s.finished);$('oaserve').classList.toggle('on',s.serve==='away'&&!s.finished);
+ticks($('oht'),s.timeoutsHome,s.timeoutLimit);ticks($('oat'),s.timeoutsAway,s.timeoutLimit);
+$('opoint').textContent=st;$('opoint').className='pill'+(st==='MATCH POINT'?' match':'');$('oseries').textContent=series();
+ologo($('ohl'),s.homeLogo,s.home[0].toUpperCase());ologo($('oal'),s.awayLogo,s.away[0].toUpperCase());
+if(ov){let rn=s.recapN||0;if(seenRecap===null)seenRecap=rn;else if(rn>seenRecap){seenRecap=rn;showRecap()}else if(rn<seenRecap){seenRecap=rn;hideRecap()}}
+if(ov){let tn=s.toN||0,te=s.toEndN||0;if(seenTo===null)seenTo=tn;else if(tn>seenTo){seenTo=tn;startTimeout()}else if(tn<seenTo){seenTo=tn;hideTimeout()}if(seenToEnd===null)seenToEnd=te;else{if(te>seenToEnd)hideTimeout();seenToEnd=te}}
+if(ov)renderPlay();
+if(ov&&dbg)$('dbg').textContent='v '+VER+' | recap '+(s.recapN||0)+'/'+seenRecap+' | timeout '+(s.toN||0)+'/'+seenTo+' | sets '+s.homeSets+'-'+s.awaySets+' | hist '+s.history.length+(s.finished?' | FINAL':'');
+if(changed){let el=$(changed==='home'?'ohscore':'oascore');el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash')}}
+function save(changed){localStorage.setItem('vb-live-state',JSON.stringify(s));render(changed);if(firebaseDb&&firebaseUser&&!applyingRemote){firebaseRef.set(s).catch(e=>setFbStatus('Sync error: '+e.message))}}
+function check(){let t=s.set===s.format?s.finalTarget:s.target,a=s.homeScore,b=s.awayScore;if(Math.max(a,b)>=t&&Math.abs(a-b)>=2){let w=a>b?'home':'away';s[w+'Sets']++;s.history.push({h:a,a:b});autoRecap();if(s[w+'Sets']>=Math.ceil(s.format/2))s.finished=true;else{s.set++;s.homeRun=0;s.homeScore=0;s.awayScore=0;s.timeoutsHome=s.timeoutLimit;s.timeoutsAway=s.timeoutLimit;s.serve=w}}}
+function point(team,d){if(s.finished)return;snap();s[team+'Score']=Math.max(0,s[team+'Score']+d);if(d===1&&team==='home'){s.homeRun=(Number.isInteger(s.homeRun)&&s.homeRun>=0?s.homeRun:0)+1;if(s.homeRun===5)s.playEvent=makePlay('run')}else{s.homeRun=0}if(d>0)s.serve=team;check();save(d>0?team:null)}
+function timeout(team){let k=team==='home'?'timeoutsHome':'timeoutsAway';if(!s.finished&&s[k]>0){snap();s[k]--;if(s.toMode>0){s.toN=(s.toN||0)+1;s.toTeam=team;s.toLen=s.toMode}save()}}
+$('hp').onclick=()=>point('home',1);$('ap').onclick=()=>point('away',1);$('hm').onclick=()=>point('home',-1);$('am').onclick=()=>point('away',-1);$('th').onclick=()=>timeout('home');$('ta').onclick=()=>timeout('away');$('sh').onclick=()=>{snap();s.serve='home';save()};$('sa').onclick=()=>{snap();s.serve='away';save()};
+$('next').onclick=()=>{if(s.finished||(!s.homeScore&&!s.awayScore))return;let t=s.set===s.format?s.finalTarget:s.target;if(Math.max(s.homeScore,s.awayScore)>=t&&Math.abs(s.homeScore-s.awayScore)>=2){snap();check()}else{if(!confirm('Current set is not complete. Start the next set anyway?'))return;snap();s.history.push({h:s.homeScore,a:s.awayScore});autoRecap();s.set++;s.homeRun=0;s.homeScore=s.awayScore=0;s.timeoutsHome=s.timeoutsAway=s.timeoutLimit}save()};
+$('undo').onclick=()=>{if(!s.undo.length)return;let x=JSON.parse(s.undo.pop());x.undo=s.undo;x.playEvent=null;s=x;save()};$('reset').onclick=()=>{if(!confirm('Reset entire match?'))return;let k={home:s.home,away:s.away,homeColor:s.homeColor,awayColor:s.awayColor,homeLogo:s.homeLogo,awayLogo:s.awayLogo,homeRank:s.homeRank,awayRank:s.awayRank,homeRecord:s.homeRecord,awayRecord:s.awayRecord,format:s.format,target:s.target,finalTarget:s.finalTarget,timeoutLimit:s.timeoutLimit,recapMode:s.recapMode,toMode:s.toMode};s={...D(),...k,timeoutsHome:k.timeoutLimit,timeoutsAway:k.timeoutLimit};save()};
+$('apply').onclick=()=>{snap();if(s.home!==($('homeName').value.trim()||'HOME')||s.away!==($('awayName').value.trim()||'AWAY'))s.homeRun=0;s.home=$('homeName').value.trim()||'HOME';s.away=$('awayName').value.trim()||'AWAY';s.homeColor=$('homeColor').value;s.awayColor=$('awayColor').value;s.homeLogo=$('homeLogo').value.trim();s.awayLogo=$('awayLogo').value.trim();s.homeRank=$('homeRank').value.trim();s.awayRank=$('awayRank').value.trim();s.homeRecord=$('homeRecord').value.trim();s.awayRecord=$('awayRecord').value.trim();s.format=+$('format').value;s.target=+$('target').value;s.finalTarget=+$('finalTarget').value;s.timeoutLimit=+$('timeoutLimit').value;s.recapMode=$('recapMode').value;s.toMode=+$('toMode').value;s.timeoutsHome=s.timeoutsAway=s.timeoutLimit;save()};
+$('recapBtn').onclick=()=>{if(!s.history.length)return;s.recapN=(s.recapN||0)+1;save()};
+$('endTo').onclick=()=>{s.toEndN=(s.toEndN||0)+1;save()};
+$('openOverlay').onclick=()=>window.open(location.href.split('?')[0]+'?overlay=1','vb-overlay');$('copy').onclick=async()=>{let u=location.href.split('?')[0]+'?overlay=1';try{await navigator.clipboard.writeText(u);alert('Overlay URL copied')}catch(e){prompt('Copy overlay URL',u)}};
+$('export').onclick=()=>{let b=new Blob([JSON.stringify({...s,teams:lib},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='volleyball-match-backup.json';a.click();URL.revokeObjectURL(a.href)};$('import').onclick=()=>$('file').click();$('file').onchange=e=>{let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let o=JSON.parse(r.result);if(Array.isArray(o.teams)){lib=o.teams.filter(x=>x&&x.name).map(x=>({id:String(x.id||uid()),name:String(x.name),rank:String(x.rank||''),record:String(x.record||''),color:/^#[0-9a-f]{6}$/i.test(x.color)?x.color:'#1769aa',logo:String(x.logo||'')}));saveLib();renderLib();delete o.teams}s={...D(),...o,homeRun:0,playEvent:null};save()}catch(e){alert('Invalid backup')}};r.readAsText(f)};
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6),esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let lib=[],editId=null;try{lib=JSON.parse(localStorage.getItem('vb-live-teams'))||[]}catch(e){}
+function saveLib(){try{localStorage.setItem('vb-live-teams',JSON.stringify(lib))}catch(e){}}
+function renderLib(){$('tlList').innerHTML=lib.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(t=>'<div class="tlrow"><span class="tlsw" style="background:'+esc(t.color)+'"></span><div class="tln"><b>'+(t.rank?'#'+esc(t.rank)+' ':'')+esc(t.name)+'</b><small>'+esc(t.record)+'</small></div><button data-a="home" data-id="'+esc(t.id)+'">HOME</button><button data-a="away" data-id="'+esc(t.id)+'">AWAY</button><button data-a="edit" data-id="'+esc(t.id)+'">Edit</button><button class="danger" data-a="del" data-id="'+esc(t.id)+'">\u2715</button></div>').join('')||'<p class="note">No teams saved yet. Add your first one above.</p>'}
+function clearTl(){editId=null;['tlName','tlRank','tlRecord','tlLogo'].forEach(i=>$(i).value='');$('tlColor').value='#1769aa';$('tlSave').textContent='Save team'}
+function useTeam(side,t){snap();if(s[side]!==t.name)s.homeRun=0;s[side]=t.name;s[side+'Color']=t.color;s[side+'Logo']=t.logo||'';s[side+'Rank']=t.rank||'';s[side+'Record']=t.record||'';$(side+'Name').value=t.name;$(side+'Color').value=t.color;$(side+'Logo').value=t.logo||'';$(side+'Rank').value=t.rank||'';$(side+'Record').value=t.record||'';save()}
+$('tlSave').onclick=()=>{let name=$('tlName').value.trim();if(!name){alert('Enter a team name');return}let o={name,rank:$('tlRank').value.trim(),record:$('tlRecord').value.trim(),color:$('tlColor').value,logo:$('tlLogo').value.trim()},t=editId&&lib.find(x=>x.id===editId);if(t)Object.assign(t,o);else lib.push({id:uid(),...o});saveLib();clearTl();renderLib()};
+$('tlClear').onclick=clearTl;
+$('tlList').onclick=e=>{let b=e.target.closest('button[data-a]');if(!b)return;let t=lib.find(x=>x.id===b.dataset.id);if(!t)return;let a=b.dataset.a;if(a==='del'){if(confirm('Delete '+t.name+' from the library?')){lib=lib.filter(x=>x!==t);if(editId===t.id)clearTl();saveLib();renderLib()}return}if(a==='edit'){editId=t.id;$('tlName').value=t.name;$('tlRank').value=t.rank||'';$('tlRecord').value=t.record||'';$('tlColor').value=t.color;$('tlLogo').value=t.logo||'';$('tlSave').textContent='Update team';$('tlName').scrollIntoView({block:'center'});return}useTeam(a,t)};
+renderLib();
+let ov=new URLSearchParams(location.search).get('overlay')==='1';if(ov){document.querySelector('.stage').dataset.pos=new URLSearchParams(location.search).get('pos')||'left';$('controller').classList.add('hidden');$('overlayScreen').classList.remove('hidden');if(dbg)$('dbg').classList.remove('hidden');document.body.style.background='transparent';document.documentElement.style.background='transparent'}else{let map={homeName:'home',awayName:'away',homeColor:'homeColor',awayColor:'awayColor',homeLogo:'homeLogo',awayLogo:'awayLogo',homeRank:'homeRank',awayRank:'awayRank',homeRecord:'homeRecord',awayRecord:'awayRecord',format:'format',target:'target',finalTarget:'finalTarget',timeoutLimit:'timeoutLimit',recapMode:'recapMode',toMode:'toMode'};Object.entries(map).forEach(([id,k])=>$(id).value=s[k]??'')}render();
+$('ver').textContent=VER;
+if(ov){let lastRaw=localStorage.getItem('vb-live-state');setInterval(()=>{let r=localStorage.getItem('vb-live-state');if(r!==lastRaw){lastRaw=r;s=load()||s;render()}},400)}
+window.addEventListener('storage',e=>{if(e.key==='vb-live-state'){s=load()||s;render()}});if('BroadcastChannel'in window){let bc=new BroadcastChannel('vb-live-score');bc.onmessage=()=>{s=load()||s;render()};let oldSave=save;save=(c)=>{oldSave(c);bc.postMessage('update')}}
+// Firebase: one shared match record for controller and PRISM overlay.
+const firebaseConfig={apiKey:'AIzaSyDrHPPekhMb2MxaCxs5_0UyOln1x-35c2w',authDomain:'volleyball-live-d3f7a.firebaseapp.com',databaseURL:'https://volleyball-live-d3f7a-default-rtdb.firebaseio.com',projectId:'volleyball-live-d3f7a',storageBucket:'volleyball-live-d3f7a.firebasestorage.app',messagingSenderId:'968992446571',appId:'1:968992446571:web:1cae017b7a587305ef792e'};
+let firebaseDb=null,firebaseAuth=null,firebaseRef=null,firebaseUser=null,applyingRemote=false,fbListener=null;
+function setFbStatus(t){let el=$('fbStatus');if(el)el.textContent=t}
+function applyRemoteState(v){if(!v||typeof v!=='object')return;applyingRemote=true;try{s={...D(),...v,undo:Array.isArray(v.undo)?v.undo:[]};localStorage.setItem('vb-live-state',JSON.stringify(s));render()}finally{applyingRemote=false}}
+function attachFirebaseListener(){if(fbListener)firebaseRef.off('value',fbListener);fbListener=snap=>{let v=snap.val();if(v)applyRemoteState(v)};firebaseRef.on('value',fbListener,e=>setFbStatus('Read error: '+e.message))}
+if(window.firebase){try{if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);firebaseAuth=firebase.auth();firebaseDb=firebase.database();firebaseRef=firebaseDb.ref('volleyball-live/current');
+ if(ov){setFbStatus('Connecting overlay…');firebaseRef.on('value',snap=>{if(snap.exists())applyRemoteState(snap.val());setFbStatus('Live overlay connected')},e=>setFbStatus('Overlay sync error: '+e.message));}
+ else{
+  $('fbLogin').onclick=async()=>{let email=$('fbEmail').value.trim(),password=$('fbPassword').value;if(!email||!password){setFbStatus('Enter email and password');return}setFbStatus('Signing in…');try{await firebaseAuth.signInWithEmailAndPassword(email,password)}catch(e){setFbStatus('Sign-in failed: '+e.message)}};
+  $('fbLogout').onclick=()=>firebaseAuth.signOut().catch(e=>setFbStatus('Sign-out error: '+e.message));
+  firebaseAuth.onAuthStateChanged(async user=>{firebaseUser=user;if(!user){if(fbListener)firebaseRef.off('value',fbListener);fbListener=null;setFbStatus('Not connected');return}setFbStatus('Loading match…');try{let snap=await firebaseRef.once('value');if(snap.exists())applyRemoteState(snap.val());else await firebaseRef.set(s);attachFirebaseListener();setFbStatus('Synced · '+user.email)}catch(e){setFbStatus('Sync error: '+e.message)}});
+ }
+ }catch(e){setFbStatus('Firebase error: '+e.message)}}else setFbStatus('Firebase SDK did not load');
+</script></body></html>
